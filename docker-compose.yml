@@ -11,12 +11,13 @@ services:
       # Timezone
       - TIMEZONE=Australia/Sydney
 
-      # PostgreSQL Database Connection (host network)
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      # Database Configuration (for auto-setup or reference)
+      - MARIADB_HOST=mariadb
+      - MARIADB_PORT=3306
+      - MARIADB_DATABASE=${DB_NAME}
+      - MARIADB_USER=${DB_USER}
+      - MARIADB_PASSWORD=${DB_PASSWORD}
+      - RESEND_API_KEY=${RESEND_API_KEY}
 
     volumes:
       # Persist GLPI data
@@ -28,6 +29,7 @@ services:
 
     networks:
       - proxy
+      - backend
 
     labels:
       - "traefik.enable=true"
@@ -55,6 +57,20 @@ services:
       - "traefik.http.middlewares.glpi-headers.headers.stsPreload=true"
       - "traefik.http.middlewares.glpi-headers.headers.forceSTSHeader=true"
 
+  mariadb:
+    image: mariadb:10.11
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-rootpassword}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - backend
+
 volumes:
   glpi_data:
     driver: local
@@ -66,7 +82,11 @@ volumes:
     driver: local
   glpi_marketplace:
     driver: local
+  mariadb_data:
+    driver: local
 
 networks:
   proxy:
+    external: true
+  backend:
     external: true

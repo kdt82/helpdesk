@@ -1,5 +1,8 @@
 # Environment files with secrets
 .env
+.env.bak
+.env.example
+*.bak
 
 # Backup files (but allow setup-database.sql)
 *_backup*.sql

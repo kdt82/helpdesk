@@ -4,7 +4,7 @@
 
 -- Create dedicated user for GLPI with a strong password
 -- IMPORTANT: Change 'YOUR_STRONG_PASSWORD_HERE' to a secure password
-CREATE USER glpi_user WITH PASSWORD 'YOUR_STRONG_PASSWORD_HERE';
+CREATE USER glpi_user WITH PASSWORD 'BlueMoonGLPI2026!';
 
 -- Create database owned by glpi_user
 CREATE DATABASE glpi WITH OWNER glpi_user ENCODING 'UTF8';
