@@ -1,0 +1,16 @@
+# Blue Moon IT Helpdesk - Custom Portal Redirect
+# This makes portal.php the default landing page while preserving
+# access to GLPI's index.php for staff login
+
+# Set the default directory index
+DirectoryIndex portal.php index.php
+
+# Ensure .php files are processed
+<FilesMatch \.php$>
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+# Prevent access to sensitive files
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

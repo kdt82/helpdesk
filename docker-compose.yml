@@ -20,6 +20,10 @@ services:
       - RESEND_API_KEY=${RESEND_API_KEY}
 
     volumes:
+      # Custom portal page (landing page for users)
+      - ./portal.php:/var/www/html/glpi/portal.php:ro
+      - ./.htaccess:/var/www/html/glpi/.htaccess:ro
+
       # Persist GLPI data
       - glpi_data:/var/www/html/glpi
       - glpi_config:/var/www/html/glpi/config
@@ -61,11 +65,13 @@ services:
     image: mariadb:10.11
     container_name: mariadb
     restart: unless-stopped
+    command: --default-time-zone='+11:00'
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-rootpassword}
       - MYSQL_DATABASE=${DB_NAME}
       - MYSQL_USER=${DB_USER}
       - MYSQL_PASSWORD=${DB_PASSWORD}
+      - TZ=Australia/Sydney
     volumes:
       - mariadb_data:/var/lib/mysql
     networks:
