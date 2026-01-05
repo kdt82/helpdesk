@@ -1,0 +1,17 @@
+# Environment files with secrets
+.env
+
+# Backup files (but allow setup-database.sql)
+*_backup*.sql
+*_dump*.sql
+glpi_*.sql
+*.sql.gz
+*.tar.gz
+backups/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

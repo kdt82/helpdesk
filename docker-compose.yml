@@ -1,0 +1,72 @@
+# GLPI Helpdesk System
+# Deploy with: docker compose up -d
+# Domain: helpdesk.bluemoonit.com.au
+
+services:
+  glpi:
+    image: diouxx/glpi:latest
+    container_name: glpi
+    restart: unless-stopped
+    environment:
+      # Timezone
+      - TIMEZONE=Australia/Sydney
+
+      # PostgreSQL Database Connection (host network)
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+    volumes:
+      # Persist GLPI data
+      - glpi_data:/var/www/html/glpi
+      - glpi_config:/var/www/html/glpi/config
+      - glpi_files:/var/www/html/glpi/files
+      - glpi_plugins:/var/www/html/glpi/plugins
+      - glpi_marketplace:/var/www/html/glpi/marketplace
+
+    networks:
+      - proxy
+
+    labels:
+      - "traefik.enable=true"
+
+      # HTTP Router - Redirect to HTTPS
+      - "traefik.http.routers.glpi-http.rule=Host(`helpdesk.bluemoonit.com.au`)"
+      - "traefik.http.routers.glpi-http.entrypoints=http"
+      - "traefik.http.routers.glpi-http.middlewares=glpi-redirect"
+      - "traefik.http.middlewares.glpi-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.glpi-redirect.redirectscheme.permanent=true"
+
+      # HTTPS Router
+      - "traefik.http.routers.glpi.rule=Host(`helpdesk.bluemoonit.com.au`)"
+      - "traefik.http.routers.glpi.entrypoints=https"
+      - "traefik.http.routers.glpi.tls=true"
+      - "traefik.http.routers.glpi.tls.certresolver=letsencrypt"
+
+      # Service - GLPI runs on port 80 internally
+      - "traefik.http.services.glpi.loadbalancer.server.port=80"
+
+      # Security Headers
+      - "traefik.http.routers.glpi.middlewares=glpi-headers"
+      - "traefik.http.middlewares.glpi-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.glpi-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.glpi-headers.headers.stsPreload=true"
+      - "traefik.http.middlewares.glpi-headers.headers.forceSTSHeader=true"
+
+volumes:
+  glpi_data:
+    driver: local
+  glpi_config:
+    driver: local
+  glpi_files:
+    driver: local
+  glpi_plugins:
+    driver: local
+  glpi_marketplace:
+    driver: local
+
+networks:
+  proxy:
+    external: true
