@@ -54,12 +54,17 @@ services:
       # Service - GLPI runs on port 80 internally
       - "traefik.http.services.glpi.loadbalancer.server.port=80"
 
-      # Security Headers
-      - "traefik.http.routers.glpi.middlewares=glpi-headers"
+      # Security Headers and Portal Redirect
+      - "traefik.http.routers.glpi.middlewares=glpi-headers,glpi-portal-redirect"
       - "traefik.http.middlewares.glpi-headers.headers.stsSeconds=31536000"
       - "traefik.http.middlewares.glpi-headers.headers.stsIncludeSubdomains=true"
       - "traefik.http.middlewares.glpi-headers.headers.stsPreload=true"
       - "traefik.http.middlewares.glpi-headers.headers.forceSTSHeader=true"
+
+      # Redirect root path to portal.php (custom landing page)
+      - "traefik.http.middlewares.glpi-portal-redirect.redirectregex.regex=^https://helpdesk.bluemoonit.com.au/?$$"
+      - "traefik.http.middlewares.glpi-portal-redirect.redirectregex.replacement=https://helpdesk.bluemoonit.com.au/portal.php"
+      - "traefik.http.middlewares.glpi-portal-redirect.redirectregex.permanent=false"
 
   mariadb:
     image: mariadb:10.11
